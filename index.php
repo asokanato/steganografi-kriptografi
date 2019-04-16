@@ -54,7 +54,7 @@ function rc4( $key_str, $data_str ) {
       return $data_str;
    }
 
-ini_set("max_execution_time",3000);
+ini_set("max_execution_time",10000);
 
 function is_even($num)
 {
@@ -118,25 +118,6 @@ function steg_hide($maskfile, $hidefile)
 	$binstream = "";
 	$recordstream = "";
 	$make_odd = Array();
-
-	// ensure a readable mask file has been sent
-	$extension = strtolower(substr($maskfile['name'],-3));
-	if($extension=="jpg")
-	{
-		$createFunc = "ImageCreateFromJPEG";
-	/*
-	}
-	else if($extension=="png")
-	{
-		$createFunc = "ImageCreateFromPNG";
-	} else if($extension=="gif")
-	{
-		$createFunc = "ImageCreateFromGIF";
-	*/
-	} else {
-		$result="Only .jpg mask files are supported";
-		echo $result;
-	}
 
 	// create images
 	$pic = ImageCreateFromJPEG($maskfile['tmp_name']);
@@ -336,7 +317,7 @@ function steg_recover($gambar)
 if(!empty($_POST['secret']))
 {
 	// ensure a readable mask file has been sent
-	$extension = strtolower(substr($maskfile['name'],-3));
+	$extension = strtolower(substr($_FILES['maskfile']['name'],-3));
 	if($extension=="jpg")
 	{
 		// esnkripsi RC4
@@ -362,12 +343,12 @@ if(!empty($_POST['secret']))
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta property='og:title' content='Asoka Data Security' />			
-	<meta property='og:site_name'  content='Naya Hijab - the simple things she needs' />
+	<meta property='og:title' content='Kodein Data Security' />			
+	<meta property='og:site_name'  content='Kodein' />
 	<meta property='og:image' content='http://security.cs.umass.edu/cyber-biglock.jpg' />
 	<meta property='og:description' content='APLIKASI STEGANOGRAFI METODE LEAST SIGNIFICANT BIT (LSB) DENGAN KOMBINASI ALGORITMA KRIPTOGRAFI RC4 DAN BASE 64 BERBASIS PHP' />
-	<meta property='og:url' content='https://asokanato.com' />
-  <title>Asokanato</title>
+	<meta property='og:url' content='https://kodein.id/demo/kripto-stegano' />
+  <title>Kripto Stegano</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.6 -->
@@ -396,8 +377,41 @@ if(!empty($_POST['secret']))
   
   <!-- /.login-logo -->
   <div class="login-box-body">
-	<h2 align=center  style="margin-bottom:20px"> <i class="fa fa-shield"></i> &nbsp Asoka Data Security </h2>
+	<h2 align=center  style="margin-bottom:20px"> <i class="fa fa-shield"></i> &nbsp Kodein Data Security </h2>
 	<div class="nav-tabs-custom">
+		<?php
+if(!empty($_FILES['gambar']['tmp_name'])) {
+	$result = steg_recover($_FILES['gambar']);
+	// decode base 64
+	$base64=base64_decode($result);
+	
+	// decode RC4
+	$key = $_POST['key_deskripsi'];
+	$plaintext = rc4( $key, $base64 );
+	
+	echo "
+		<table border=0 class='table table-bordered' style='font-size:large'>
+			<tr>
+				<td align=right><b>Chipertext Base64:</b></td>
+				<td align=left><textarea class='form-control'>$result</textarea></td>
+			</tr>
+			<tr>
+				<td align=right><b>Key:</b></td>
+				<td align=left>$key</td>
+			</tr>
+			<tr>
+				<td align=right><b>Chipertext RC4:</b></td>
+				<td align=left><textarea class='form-control'>$base64</textarea></td>
+			</tr>			
+			<tr>
+				<td align=right><b>Plaintext:</b></td>
+				<td align=left><font color='red'>$plaintext</font></td>
+			</tr>
+		</table>
+	";
+	
+}
+?>
         <ul class="nav nav-tabs pull-right">
             <li ><a href="#tab_1" class="btn btn-app" data-toggle="tab" ><i class="fa fa-unlock"></i> Deskripsi</a> </li>
             <li class="active"><a href="#tab_2" class="btn btn-app" data-toggle="tab" ><i class="fa fa-lock"></i> Enskripsi</a></li>
@@ -456,39 +470,7 @@ if(!empty($_POST['secret']))
               <!-- /.tab-pane -->
             </div>
             <!-- /.tab-content -->
-<?php
-if(!empty($_FILES['gambar']['tmp_name'])) {
-	$result = steg_recover($_FILES['gambar']);
-	// decode base 64
-	$base64=base64_decode($result);
-	
-	// decode RC4
-	$key = $_POST['key_deskripsi'];
-	$plaintext = rc4( $key, $base64 );
-	
-	echo "
-		<table border=0 class='table table-bordered' style='font-size:large'>
-			<tr>
-				<td align=right><b>Chipertext Base64:</b></td>
-				<td align=left><textarea class='form-control'>$result</textarea></td>
-			</tr>
-			<tr>
-				<td align=right><b>Key:</b></td>
-				<td align=left>$key</td>
-			</tr>
-			<tr>
-				<td align=right><b>Chipertext RC4:</b></td>
-				<td align=left><textarea class='form-control'>$base64</textarea></td>
-			</tr>			
-			<tr>
-				<td align=right><b>Plaintext:</b></td>
-				<td align=left><font color='red'>$plaintext</font></td>
-			</tr>
-		</table>
-	";
-	
-}
-?>
+
     </div>	
   </div>
   <!-- /.login-box-body -->	
